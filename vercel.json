@@ -15,7 +15,7 @@
     ],
     "routes": [
       {
-        "src": "/api/(.*)",
+        "src": "/api/summarize",
         "dest": "/backend/api/server.js"
       },
       {
