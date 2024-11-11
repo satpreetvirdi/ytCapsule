@@ -17,27 +17,39 @@ app.use(express.json());
 
 // Extract the API keys from process.env
 const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
-const Cortex_API_KEY = process.env.Cortex_API_KEY;
-
-app.post("/summarize", async (req, res) => {
-  const { videoUrl } = req.body;
-  const outputPath = path.join(__dirname, "output.mp3");
-
-  try {
-    // Step 1: Extract audio using yt-dlp-exec
+const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
+// if (!ASSEMBLYAI_API_KEY || !Cortex_API_KEY) {
+  //   console.error("Missing API keys. Ensure that ASSEMBLYAI_API_KEY and Cortex_API_KEY are set.");
+  //   process.exit(1);
+  // }
+  
+  app.post("/summarize", async (req, res) => {
+    const { videoUrl } = req.body;
+    const outputPath = path.join(__dirname, "output.mp3");
+    
+    try {
+      console.log(ASSEMBLYAI_API_KEY,CORTEX_API_KEY);
+      // Step 1: Extract audio using yt-dlp-exec
+    console.log("Extracting audio...");
     await new Promise((resolve, reject) => {
       ytDlp(videoUrl, {
         output: outputPath,
         extractAudio: true,
         audioFormat: "mp3",
-        ffmpegLocation: ffmpegPath, // Specify the path to ffmpeg
         quiet: true,
+        ffmpegLocation: ffmpegPath
       })
-        .then(resolve)
-        .catch(reject);
+        .then(() => {
+          console.log("Audio extraction completed successfully.");
+          resolve();
+        })
+        .catch((error) => {
+          console.error("Audio extraction failed", error);
+          reject(error);
+        });
     });
-
     // Step 2: Upload audio file to AssemblyAI for transcription
+    console.log("Uploading audio for transcription...");
     const uploadResponse = await axios.post(
       "https://api.assemblyai.com/v2/upload",
       fs.createReadStream(outputPath),
@@ -46,9 +58,15 @@ app.post("/summarize", async (req, res) => {
           authorization: ASSEMBLYAI_API_KEY,
           "transfer-encoding": "chunked",
         },
+        
       }
     );
-    console.log("uploadResponse", uploadResponse);
+
+    if (uploadResponse.status !== 200) {
+      throw new Error(`Upload failed: ${uploadResponse.statusText}`);
+    }
+
+    console.log("Starting transcription...");
     const transcriptionResponse = await axios.post(
       "https://api.assemblyai.com/v2/transcript",
       {
@@ -61,10 +79,15 @@ app.post("/summarize", async (req, res) => {
       }
     );
 
+    if (transcriptionResponse.status !== 200) {
+      throw new Error(`Transcription initiation failed: ${transcriptionResponse.statusText}`);
+    }
+
     const transcriptId = transcriptionResponse.data.id;
-    console.log("transcriptId", transcriptId);
+
     // Poll AssemblyAI for transcription completion
     let transcriptData;
+    console.log("Polling transcription status...");
     while (true) {
       const response = await axios.get(
         `https://api.assemblyai.com/v2/transcript/${transcriptId}`,
@@ -76,17 +99,20 @@ app.post("/summarize", async (req, res) => {
         }
       );
       transcriptData = response.data;
-      console.log("transcriptData", transcriptData);
+
       if (transcriptData.status === "completed") {
+        console.log("Transcription completed.");
         break;
       } else if (transcriptData.status === "failed") {
         throw new Error("Transcription failed");
       }
-      await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait for 5 seconds
+
+      console.log("Transcription in progress... retrying in 10 seconds");
+      await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait for 10 seconds
     }
 
     // Step 3: Use Hugging Face API to summarize the transcription
-    // transcriptData.text
+    console.log("Summarizing transcription...");
     const summaryResponse = await axios.post(
       "https://article-extractor-and-summarizer.p.rapidapi.com/summarize-text",
       {
@@ -96,19 +122,24 @@ app.post("/summarize", async (req, res) => {
       {
         headers: {
           "x-rapidapi-host": "article-extractor-and-summarizer.p.rapidapi.com",
-          "x-rapidapi-key": `${Cortex_API_KEY}`,
+          "x-rapidapi-key": CORTEX_API_KEY,
         },
       }
     );
-    console.log("summaryResponse", summaryResponse);
+
+    if (summaryResponse.status !== 200) {
+      throw new Error(`Summarization failed: ${summaryResponse.statusText}`);
+    }
+
     // Send the summarized response back to the client
+    console.log("Summarization completed. Sending response...");
     res.json({ summary: summaryResponse.data.summary });
 
     // Clean up by removing the audio file
     fs.unlinkSync(outputPath);
   } catch (error) {
-    console.error("Error processing video:", error);
-    res.status(500).json({ error: "Failed to process video" });
+    console.error("Error processing video:", error.message || error);
+    res.status(500).json({ error: "Failed to process video", details: error.message || "Unknown error" });
   }
 });
 
