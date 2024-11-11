@@ -12,11 +12,8 @@
         "dest": "/backend/server.js"
       }
     ],
-    "rewrites": [
-        {
-          "source": "/backend/:path*",
-          "destination": "/backend/server.js"
-        }
+    "rewrites":  [
+        {"source": "/(.*)", "destination": "/"}
       ]
   }
   
