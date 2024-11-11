@@ -1,0 +1,34 @@
+/* Apply typewriter effect to each word */
+/* Apply general dark theme styles */
+body {
+  background-color: #121212;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* Apply styles for the typewriter effect (no need to add animation for single pass) */
+.typewriter-container {
+  display: inline-block;
+  white-space: nowrap; /* Keep words on the same line */
+}
+
+
+.typewriter {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap; /* Keep each word in a single line */
+  border-right: 3px solid #ff0000; /* Simulating typewriter cursor */
+  animation: typing 0.5s steps(1) forwards, blink 0.75s step-end infinite;
+}
+
+/* Typing animation for each word */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* Blink cursor animation */
+@keyframes blink {
+  from, to { border-color: transparent; }
+  50% { border-color: #ff0000; }
+}
