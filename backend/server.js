@@ -23,7 +23,7 @@ const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
   //   process.exit(1);
   // }
   
-  app.post("/summarize", async (req, res) => {
+  app.post("/api/summarize", async (req, res) => {
     const { videoUrl } = req.body;
     const outputPath = path.join(__dirname, "output.mp3");
     
