@@ -21,7 +21,7 @@ const App = () => {
     setError('');
 
     try {
-      const response = await axios.post('https://musical-smakager-79c52b.netlify.app/summarize', { videoUrl });
+      const response = await axios.post('http://localhost:5000/summarize', { videoUrl });
       setSummary(response.data.summary);
     } catch (err) {
       console.error('Error fetching summary:', err);
