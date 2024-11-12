@@ -5,10 +5,8 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const ytDlp = require("yt-dlp-exec");
-const ffmpegPath = require('path').resolve(__dirname, 'node_modules/ffmpeg-static/ffmpeg');
-// const ytDlpPath = path.join(__dirname, "node_modules/yt-dlp-exec/bin/yt-dlp");
+const ffmpegPath = require("ffmpeg-static");
 const ffmpeg = require("fluent-ffmpeg");
-const { exec } = require("child_process");
 
 // Set ffmpeg path for fluent-ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath);
@@ -25,7 +23,7 @@ const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
   //   process.exit(1);
   // }
   
-  app.post("/api/summarize", async (req, res) => {
+  app.post("/summarize", async (req, res) => {
     const { videoUrl } = req.body;
     const outputPath = path.join(__dirname, "output.mp3");
     
@@ -146,9 +144,9 @@ const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
   }
 });
 
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
-module.exports = app;
+// module.exports = app;
