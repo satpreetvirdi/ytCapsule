@@ -37,7 +37,7 @@ const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
         extractAudio: true,
         audioFormat: "mp3",
         quiet: true,
-        ffmpegLocation: ffmpegPath
+        ffmpegLocation: path.resolve(ffmpegPath)
       })
         .then(() => {
           console.log("Audio extraction completed successfully.");
