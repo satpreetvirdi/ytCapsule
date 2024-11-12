@@ -6,7 +6,9 @@ const fs = require("fs");
 const path = require("path");
 const ytDlp = require("yt-dlp-exec");
 const ffmpegPath = require("ffmpeg-static");
+const ytDlpPath = path.join(__dirname, "yt-dlp");
 const ffmpeg = require("fluent-ffmpeg");
+const { exec } = require("child_process");
 
 // Set ffmpeg path for fluent-ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath);
@@ -37,7 +39,8 @@ const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
         extractAudio: true,
         audioFormat: "mp3",
         quiet: true,
-        ffmpegLocation: path.resolve(ffmpegPath)
+        ffmpegLocation: ffmpegPath,
+        exec:ytDlpPath
       })
         .then(() => {
           console.log("Audio extraction completed successfully.");
