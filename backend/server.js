@@ -4,9 +4,9 @@ const cors = require("cors");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const ytDlp = require("yt-dlp-exec");
+const ytDlp = require("node_modules/yt-dlp-exec/bin/yt-dlp");
 const ffmpegPath = require('path').resolve(__dirname, 'node_modules/ffmpeg-static/ffmpeg');
-const ytDlpPath = path.join(__dirname, "node_modules/yt-dlp-exec/bin/yt-dlp");
+// const ytDlpPath = path.join(__dirname, "node_modules/yt-dlp-exec/bin/yt-dlp");
 const ffmpeg = require("fluent-ffmpeg");
 const { exec } = require("child_process");
 
@@ -39,8 +39,7 @@ const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
         extractAudio: true,
         audioFormat: "mp3",
         quiet: true,
-        ffmpegLocation: ffmpegPath,
-        exec:ytDlpPath
+        ffmpegLocation: ffmpegPath
       })
         .then(() => {
           console.log("Audio extraction completed successfully.");
@@ -70,6 +69,7 @@ const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
     }
 
     console.log("Starting transcription...");
+
     const transcriptionResponse = await axios.post(
       "https://api.assemblyai.com/v2/transcript",
       {
