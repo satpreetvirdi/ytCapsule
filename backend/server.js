@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const ytDlp = require("yt-dlp-exec");
 const ffmpegPath = require("ffmpeg-static");
-const ytDlpPath = path.join(__dirname, "yt-dlp");
+const ytDlpPath = path.join(__dirname, "node_modules/yt-dlp-exec/bin/yt-dlp");
 const ffmpeg = require("fluent-ffmpeg");
 const { exec } = require("child_process");
 
