@@ -1,0 +1,15 @@
+[build]
+  base = "backend"
+  command = "npm install && npm run build"
+  functions = "functions"
+[functions]
+  directory = "functions"
+[dev]
+  functions = "backend/functions"
+[[redirects]]
+  # Redirect API calls to the Netlify Functions
+  from = "/api/*"
+  to = "/functions/:splat"
+  status = 200
+  force = true
+    headers = { "Access-Control-Allow-Origin" = "*", "Access-Control-Allow-Methods" = "OPTIONS, POST, GET", "Access-Control-Allow-Headers" = "Content-Type" }
