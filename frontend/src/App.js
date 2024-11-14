@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './App.css'; // Importing CSS for styles
+import './App.css'; 
 
 const App = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const [summary, setSummary] = useState('');
-  const [typedSummary, setTypedSummary] = useState(''); // State for the typewriter effect
+  const [typedSummary, setTypedSummary] = useState(''); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -30,8 +30,7 @@ const App = () => {
       setLoading(false);
     }
   };
-
-  // Effect to type out the summary one character at a time
+  
   useEffect(() => {
     if (summary) {
       let index = 0;
@@ -41,10 +40,12 @@ const App = () => {
         if (index >= summary.length) {
           clearInterval(interval);
         }
-      }, 20); // Adjust the typing speed by changing the interval time
-      return () => clearInterval(interval); // Cleanup interval on unmount
+      }, 20); 
+      return () => clearInterval(interval); 
     }
   }, [summary]);
+
+  console.log("summary",summary);
 
   return (
     <div style={{ padding: '20px', textAlign: 'center', backgroundColor: '#121212', color: '#ffffff', minHeight: '100vh' }}>
@@ -76,7 +77,7 @@ const App = () => {
             borderRadius: '5px',
             cursor: 'pointer',
             transition: 'background-color 0.3s',
-            marginTop:"20px"
+            marginTop: '20px', 
           }}
         >
           Get Summary
@@ -84,25 +85,23 @@ const App = () => {
       </form>
       {loading && <p>Loading summary, please wait...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      {typedSummary && (
-        <div
-          style={{
-            backgroundColor: '#333',
-            color: '#fff',
-            padding: '50px',
-            marginTop: '20px',
-            borderRadius: '8px',
-            maxWidth: '60%',
-            margin: 'auto',
-            textAlign: 'left',
-            whiteSpace: 'normal',
-            wordWrap: 'break-word',
-            overflowWrap: 'break-word',
-            lineHeight: '2'
-          }}
-        >
-          <h3>Video Summary:</h3>
-          <div>{typedSummary}</div> {/* Display the word-by-word typed summary */}
+      {!loading && !error && typedSummary && (
+        <div style={{
+          backgroundColor: '#333',
+          color: '#fff',
+          padding: '50px',
+          marginTop: '20px',
+          borderRadius: '8px',
+          maxWidth: '60%',
+          margin: 'auto',
+          textAlign: 'left',
+          whiteSpace: 'normal',
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word',
+          lineHeight: '2'
+        }}>
+          <h2>Summary:</h2>
+          <p>{typedSummary}</p>
         </div>
       )}
     </div>

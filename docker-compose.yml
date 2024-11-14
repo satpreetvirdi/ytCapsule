@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend  # Specify the context as the backend folder
+      dockerfile: Dockerfile  # The Dockerfile in the backend folder
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/usr/src/app  # Mount the backend directory (optional)
+
+  frontend:
+    build:
+      context: ./frontend  # Specify the context as the frontend folder
+      dockerfile: Dockerfile  # The Dockerfile in the frontend folder
+    ports:
+      - "3000:80"  # Change this port as necessary for the frontend
