@@ -21,7 +21,7 @@ const App = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/summarize', { videoUrl });
+      const response = await axios.post('https://ytcapsule-2.onrender.com/summarize', { videoUrl });
       setSummary(response.data.summary);
     } catch (err) {
       console.error('Error fetching summary:', err);
