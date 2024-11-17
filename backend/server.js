@@ -7,31 +7,154 @@ const path = require("path");
 const ffmpegPath = require("ffmpeg-static");
 const ffmpeg = require("fluent-ffmpeg");
 const { exec } = require("child_process");
+const session = require("express-session");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const { CookieJar } = require("tough-cookie");
 
 
+// Configure ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath);
-console.log('ffmpeg path:', ffmpegPath);
-console.log('fluent ffmpeg path:', ffmpeg);
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: 'https://ytcapsule-1.onrender.com/', // Replace with your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // Allow cookies to be sent with requests
+};
 
+app.use(cors(corsOptions));
 app.use(express.json());
 
-const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
-const CORTEX_API_KEY = process.env.CORTEX_API_KEY;
+// Session middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+  })
+);
 
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+// console.log(process.env.CORTEX_API_KEY);
+// Configure Passport for Google OAuth
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/auth/google/callback",
+    },
+    (accessToken, refreshToken, profile, done) => {
+      // User profile can be stored in session
+      return done(null, profile);
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+// Route for Google OAuth login
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// Google OAuth callback route
+// app.get(
+//   "/auth/google/callback",
+//   passport.authenticate("google", {
+//     failureRedirect: "/login-failed",
+//     successRedirect: "/auth-redirect",
+//   })
+// );
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login-failed", successRedirect: "/auth-redirect" }),
+  async (req, res) => {
+    // Capture the cookies after successful authentication
+    if (req.user) {
+      try {
+        const cookieJar = new CookieJar();
+
+        // Make a request to YouTube or any Google service to get cookies
+        const response = await axios.get("https://www.youtube.com/", {
+          headers: {
+            "Authorization": `Bearer ${req.user.accessToken}`, // Use access token for authentication
+          },
+          jar: cookieJar, // Store cookies in this jar
+          withCredentials: true,
+        });
+
+        // Extract the cookies from the jar
+        const cookies = cookieJar.toJSON();
+        console.log("cookies",cookies);
+        const cookiesFilePath = path.join(__dirname, "cookies.json");
+
+        // Save cookies to a file
+        fs.writeFileSync(cookiesFilePath, JSON.stringify(cookies));
+
+        console.log("Cookies captured and saved to cookies.json");
+      } catch (error) {
+        console.error("Error capturing cookies", error);
+      }
+    }
+
+    // Redirect to the frontend
+    res.redirect("https://ytcapsule-1.onrender.com/");
+  }
+);
+
+// Check authentication status
+app.get("/check-auth", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ isAuthenticated: true });
+  } else {
+    res.json({ isAuthenticated: false });
+  }
+});
+// New route to check if the user is logged in and redirect to the frontend
+app.get("/auth-redirect", (req, res) => {
+  if (req.isAuthenticated()) {
+  
+    res.redirect("https://ytcapsule-1.onrender.com/");
+  } else {
+
+    res.redirect("https://ytcapsule-1.onrender.com/login");
+  }
+});
+const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
+
+// Summarize route with auth check
 app.post("/summarize", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "User not authenticated" });
+  }
+
   const { videoUrl } = req.body;
+  const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
+  
   const outputPath = path.join(__dirname, "output.mp3");
 
   try {
-    console.log(ASSEMBLYAI_API_KEY, CORTEX_API_KEY);
+    const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
 
+    if (!cookies) {
+      return res.status(400).json({ error: "Cookies not found, user not authenticated." });
+    }
 
-    console.log("Extracting audio...");
     await new Promise((resolve, reject) => {
-      exec(`yt-dlp -x --audio-format mp3 -o "${outputPath}" ${videoUrl}`, (error, stdout, stderr) => {
+      exec(`yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies "${ytDlpCookiesPath}" ${videoUrl}`, (error, stdout, stderr) => {
         if (error) {
           console.error("Audio extraction failed", error);
           reject(error);
@@ -42,8 +165,6 @@ app.post("/summarize", async (req, res) => {
       });
     });
 
-
-    // console.log("Uploading audio for transcription...");
     const uploadResponse = await axios.post(
       "https://api.assemblyai.com/v2/upload",
       fs.createReadStream(outputPath),
@@ -59,92 +180,12 @@ app.post("/summarize", async (req, res) => {
       throw new Error(`Upload failed: ${uploadResponse.statusText}`);
     }
 
-    // console.log("Starting transcription...");
-
-    const transcriptionResponse = await axios.post(
-      "https://api.assemblyai.com/v2/transcript",
-      {
-        audio_url: uploadResponse.data.upload_url,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${ASSEMBLYAI_API_KEY}`,
-        },
-      }
-    );
-    // console.log("transcriptionResponse",transcriptionResponse);
-    if (transcriptionResponse.status !== 200) {
-      throw new Error(`Transcription initiation failed: ${transcriptionResponse.statusText}`);
-    }
-
-    const transcriptId = transcriptionResponse.data.id;
-
-    // Step 3: Poll for transcription completion
-    let transcriptionCompleted = false;
-    let transcriptionResult;
-
-    // console.log("Polling transcription status...");
-    while (!transcriptionCompleted) {
-      const pollingResponse = await axios.get(
-        `https://api.assemblyai.com/v2/transcript/${transcriptId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${ASSEMBLYAI_API_KEY}`,
-          },
-        }
-      );
-
-      if (pollingResponse.data.status === "completed") {
-        transcriptionCompleted = true;
-        transcriptionResult = pollingResponse.data;
-        console.log("Transcription completed successfully.");
-        console.log("transcriptionResult.text",transcriptionResult.text);
-      } else if (pollingResponse.data.status === "failed") {
-        throw new Error("Transcription failed.");
-      } else {
-        console.log("Transcription in progress...");
-        await new Promise((resolve) => setTimeout(resolve, 5000)); 
-      }
-    }
-    console.log("Summarizing transcription...");
-    const summaryResponse = await axios.post(
-      "https://article-extractor-and-summarizer.p.rapidapi.com/summarize-text",
-      {
-        language: "en",
-        text: transcriptionResult.text,
-      },
-      {
-        headers: {
-          "x-rapidapi-host": "article-extractor-and-summarizer.p.rapidapi.com",
-          "x-rapidapi-key": CORTEX_API_KEY,
-        },
-      }
-    );
-
-    if (summaryResponse.status !== 200) {
-      throw new Error(`Summarization failed: ${summaryResponse.statusText}`);
-    }
-    
-    // console.log("Summarization completed. Sending response...");
-    res.json({ summary: summaryResponse.data.summary });
-
-
+    res.json({ message: "Audio extraction and upload completed." });
   } catch (error) {
-    console.error("An error occurred during the process:", error);
-    res.status(500).json({
-      error: error.message || "An unexpected error occurred."
-    });
-  } finally {
-    // Clean up temporary audio file
-    if (fs.existsSync(outputPath)) {
-      fs.unlinkSync(outputPath);
-      console.log("Temporary audio file deleted.");
-    }
+    console.error("Error during the process", error);
+    res.status(500).json({ error: "An error occurred during audio extraction." });
   }
 });
 
-// Start the server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
