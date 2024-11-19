@@ -130,7 +130,7 @@ app.get("/auth-redirect", (req, res) => {
     res.redirect("https://ytcapsule-1.onrender.com/");
   } else {
 
-    res.redirect("https://ytcapsule-1.onrender.com/login");
+    res.redirect("https://ytcapsule-1.onrender.com/");
   }
 });
 const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
