@@ -111,7 +111,7 @@ app.get(
     }
 
     // Redirect to the frontend
-    res.redirect("https://ytcapsule-1.onrender.com");
+    res.redirect("https://ytcapsule-1.onrender.com/");
   }
 );
 
