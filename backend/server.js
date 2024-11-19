@@ -128,13 +128,7 @@ app.get('/check-auth', (req, res) => {
 });
 // New route to check if the user is logged in and redirect to the frontend
 app.get("/auth-redirect", (req, res) => {
-  if (req.isAuthenticated()) {
-  
-    res.redirect("https://ytcapsule-1.onrender.com/");
-  } else {
-
-    res.redirect("https://ytcapsule-1.onrender.com/");
-  }
+  res.redirect("https://ytcapsule-1.onrender.com");
 });
 const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
 
