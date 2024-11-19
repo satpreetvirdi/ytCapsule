@@ -18,7 +18,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 
 const app = express();
 const corsOptions = {
-  origin: 'https://ytcapsule-1.onrender.com', // Replace with your frontend URL
+  origin: 'https://ytcapsule-1.onrender.com/', // Replace with your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true, // Allow cookies to be sent with requests
 };
@@ -127,7 +127,7 @@ app.get("/check-auth", (req, res) => {
 app.get("/auth-redirect", (req, res) => {
   if (req.isAuthenticated()) {
   
-    res.redirect("https://ytcapsule-1.onrender.com/");
+    res.redirect("https://ytcapsule-1.onrender.com");
   } else {
 
     res.redirect("https://ytcapsule-1.onrender.com/login");
