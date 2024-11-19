@@ -18,7 +18,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 
 const app = express();
 const corsOptions = {
-  origin: 'https://ytcapsule-1.onrender.com/', // Replace with your frontend URL
+  origin: 'https://ytcapsule-1.onrender.com', // Replace with your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true, // Allow cookies to be sent with requests
 };
@@ -32,7 +32,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { secure: true }
   })
 );
 
@@ -49,7 +49,7 @@ passport.use(
       callbackURL: "/auth/google/callback",
     },
     (accessToken, refreshToken, profile, done) => {
-      // User profile can be stored in session
+      profile.accessToken = accessToken;
       return done(null, profile);
     }
   )
@@ -111,7 +111,7 @@ app.get(
     }
 
     // Redirect to the frontend
-    res.redirect("https://ytcapsule-1.onrender.com/");
+    res.redirect("https://ytcapsule-1.onrender.com");
   }
 );
 
