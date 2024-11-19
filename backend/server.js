@@ -116,11 +116,11 @@ app.get(
 );
 
 // Check authentication status
-app.get("/check-auth", (req, res) => {
+app.get('/check-auth', (req, res) => {
   if (req.isAuthenticated()) {
-    res.json({ isAuthenticated: true });
+    res.status(200).json({ isAuthenticated: true });
   } else {
-    res.json({ isAuthenticated: false });
+    res.status(200).json({ isAuthenticated: false });
   }
 });
 // New route to check if the user is logged in and redirect to the frontend
