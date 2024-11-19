@@ -18,7 +18,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 
 const app = express();
 const corsOptions = {
-  origin: 'https://ytcapsule-1.onrender.com/', // Replace with your frontend URL
+  origin: 'https://ytcapsule-1.onrender.com', // Replace with your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true, // Allow cookies to be sent with requests
   allowedHeaders: ['Content-Type', 'Authorization']
