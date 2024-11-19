@@ -33,7 +33,9 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }
+    cookie: { secure: true,
+      sameSite: 'None'
+    }
   })
 );
 
@@ -112,7 +114,7 @@ app.get(
     }
 
     // Redirect to the frontend
-    res.redirect("https://ytcapsule-1.onrender.com/");
+    res.redirect("https://ytcapsule-1.onrender.com");
   }
 );
 
