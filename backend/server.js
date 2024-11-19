@@ -127,7 +127,7 @@ app.get("/check-auth", (req, res) => {
 app.get("/auth-redirect", (req, res) => {
   if (req.isAuthenticated()) {
   
-    res.redirect("https://ytcapsule-1.onrender.com");
+    res.redirect("https://ytcapsule-1.onrender.com/");
   } else {
 
     res.redirect("https://ytcapsule-1.onrender.com/login");
