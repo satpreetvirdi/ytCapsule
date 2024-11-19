@@ -88,6 +88,8 @@ app.get(
     // Capture the cookies after successful authentication
     if (req.user) {
       try {
+        req.session.user = req.user;
+        console.log("Session after login:", req.session);
         const cookieJar = new CookieJar();
 
         // Make a request to YouTube or any Google service to get cookies
@@ -120,6 +122,7 @@ app.get(
 
 // Check authentication status
 app.get('/check-auth', (req, res) => {
+  console.log("Session data:", req.session);
   if (req.session.user) {
     res.status(200).json({ isAuthenticated: true });
   } else {
