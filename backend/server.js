@@ -68,15 +68,14 @@ passport.use(
     }
   )
 );
-const users = {};
 passport.serializeUser((user, done) => {
-  users[user.id] = user;
+  // users[user.id] = user;
   console.log("Serializing user:", user.id);
   done(null, user.id);
 });
 
-passport.deserializeUser((userId, done) => {
-  const user = users[userId];
+passport.deserializeUser((user, done) => {
+  // const user = users[userId];
   console.log("Deserializing user:", user);
   done(null, user);
 });
@@ -87,6 +86,7 @@ app.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
+const users = [];
 // Google OAuth callback route
 app.get(
   "/auth/google/callback",
@@ -95,7 +95,8 @@ app.get(
     console.log("Authentication callback triggered.");
     if (req.user) {
       try {
-        console.log("Session after login:before", req.session);        
+        console.log("Session after login:before", req.session); 
+        users.push(req.user);       
         req.session.user = req.user;
         console.log("Session after login:after", req.session);
 
@@ -131,9 +132,9 @@ app.get('/check-auth', (req, res) => {
   console.log("Authenticated user:", req.user);
   console.log("req.session.user", req.session.user);
 
-  if (req.session && req.session.user) {
-    // console.log("Authenticated user:",  req.session.user);
+  if (users.length > 0) {
     return res.status(200).json({ isAuthenticated: true });
+    users.length = 0;
   }
 
   res.status(200).json({ isAuthenticated: false });
