@@ -170,7 +170,7 @@ app.post("/summarize", async (req, res) => {
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies-from-browser ${videoUrl}`,
+        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies-from-browser chrome ${videoUrl}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error("Audio extraction failed:", error);
