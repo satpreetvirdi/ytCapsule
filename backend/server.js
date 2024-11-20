@@ -112,7 +112,7 @@ app.get(
         const cookies = cookieJar.toJSON();
         console.log("Captured cookies:", cookies);
 
-        const cookiesFilePath = path.join(__dirname, "cookies.txt");
+        const cookiesFilePath = path.join(__dirname, "cookies.json");
         const cookieString = cookies.map(cookie => cookie.cookieString()).join('; ');
         fs.writeFileSync(cookiesFilePath, cookieString);
         console.log("Cookies saved to cookies.json");
@@ -156,21 +156,21 @@ app.post("/summarize", async (req, res) => {
   // }
 
   const { videoUrl } = req.body;
-  const ytDlpCookiesPath = path.join(__dirname, "cookies.txt");
+  const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
   const outputPath = path.join(__dirname, "output.mp3");
 
   try {
     const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
 
-    if (!cookies) {
-      console.error("Cookies file not found.");
-      return res.status(400).json({ error: "Cookies not found, user not authenticated." });
-    }
+    // if (!cookies) {
+    //   console.error("Cookies file not found.");
+    //   return res.status(400).json({ error: "Cookies not found, user not authenticated." });
+    // }
 
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies "${ytDlpCookiesPath}" ${videoUrl}`,
+        `yt-dlp -x --audio-format mp3 -o "${outputPath}" ${videoUrl}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error("Audio extraction failed:", error);
