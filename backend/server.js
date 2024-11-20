@@ -133,8 +133,8 @@ app.get('/check-auth', (req, res) => {
   console.log("req.session.user", req.session.user);
 
   if (users.length > 0) {
-    return res.status(200).json({ isAuthenticated: true });
     users.length = 0;
+    return res.status(200).json({ isAuthenticated: true });
   }
 
   res.status(200).json({ isAuthenticated: false });
