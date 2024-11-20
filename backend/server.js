@@ -112,8 +112,9 @@ app.get(
         const cookies = cookieJar.toJSON();
         console.log("Captured cookies:", cookies);
 
-        const cookiesFilePath = path.join(__dirname, "cookies.json");
-        fs.writeFileSync(cookiesFilePath, JSON.stringify(cookies));
+        const cookiesFilePath = path.join(__dirname, "cookies.txt");
+        const cookieString = cookies.map(cookie => cookie.cookieString()).join('; ');
+        fs.writeFileSync(cookiesFilePath, cookieString);
         console.log("Cookies saved to cookies.json");
       } catch (error) {
         console.error("Error capturing cookies:", error.message);
@@ -155,7 +156,7 @@ app.post("/summarize", async (req, res) => {
   // }
 
   const { videoUrl } = req.body;
-  const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
+  const ytDlpCookiesPath = path.join(__dirname, "cookies.txt");
   const outputPath = path.join(__dirname, "output.mp3");
 
   try {
