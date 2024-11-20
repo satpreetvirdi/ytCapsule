@@ -33,8 +33,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: true,
-      sameSite: 'None',
+      secure: false
     },
   })
 );
@@ -53,7 +52,7 @@ passport.use(
     },
     (accessToken, refreshToken, profile, done) => {
       profile.accessToken = accessToken;
-      console.log("Google profile received:", profile);
+      console.log("Google profile received:", profile.accessToken);
       return done(null, profile);
     }
   )
@@ -126,10 +125,10 @@ app.get('/check-auth', (req, res) => {
 
 // Redirect after successful login
 app.get("/auth-redirect", (req, res) => {
-  console.log("Redirecting to frontend...");
-  res.redirect("https://ytcapsule-1.onrender.com");
+  if (req.isAuthenticated()) {
+    res.redirect("https://ytcapsule-1.onrender.com");
+  } 
 });
-
 // Summarize route with auth check
 app.post("/summarize", async (req, res) => {
   console.log("Summarize route accessed.");

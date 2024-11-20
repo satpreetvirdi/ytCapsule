@@ -14,13 +14,17 @@ const App = () => {
     // Check if the user is logged in by making a call to the backend
     axios.get('https://ytcapsule-2.onrender.com/check-auth',{ withCredentials: true })
       .then(response => {
+        console.log("response",response.data);
         if (response.data.isAuthenticated) {
           setIsLoggedIn(true);
         }
       })
       .catch(() => {
+        console.log("response",response.data);
+
         setIsLoggedIn(false);
       });
+      console.log("isLoggedIn",isLoggedIn);
   }, []);
 
   const handleVideoUrlChange = (e) => {
