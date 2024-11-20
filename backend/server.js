@@ -149,10 +149,10 @@ app.get("/auth-redirect", (req, res) => {
 // Summarize route with auth check
 app.post("/summarize", async (req, res) => {
   console.log("Summarize route accessed.");
-  if (!req.isAuthenticated() && !req.session.user) {
-    console.warn("User not authenticated for summarize route.");
-    return res.status(401).json({ error: "User not authenticated" });
-  }
+  // if (!req.isAuthenticated() && !req.session.user) {
+  //   console.warn("User not authenticated for summarize route.");
+  //   return res.status(401).json({ error: "User not authenticated" });
+  // }
 
   const { videoUrl } = req.body;
   const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
