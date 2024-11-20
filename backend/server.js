@@ -93,8 +93,9 @@ app.get(
     console.log("Authentication callback triggered.");
     if (req.user) {
       try {
+        console.log("Session after login:before", req.session);        
         req.session.user = req.user;
-        console.log("Session after login:", req.session);
+        console.log("Session after login:after", req.session);
 
         const cookieJar = new CookieJar();
         const response = await axios.get("https://www.youtube.com/", {
