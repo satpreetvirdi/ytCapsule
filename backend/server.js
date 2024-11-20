@@ -42,7 +42,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: false,
+      secure: true,
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000
     },
@@ -125,11 +125,11 @@ app.get(
 // Check authentication status
 app.get('/check-auth', (req, res) => {
   console.log("Session data in /check-auth:", req.session);
-  // console.log("Authenticated user:", req.user);
+  console.log("Authenticated user:", req.user);
   console.log("req.session.user", req.session.user);
 
   if (req.session && req.session.user) {
-    console.log("Authenticated user:",  req.session.user);
+    // console.log("Authenticated user:",  req.session.user);
     return res.status(200).json({ isAuthenticated: true });
   }
 
