@@ -68,13 +68,15 @@ passport.use(
     }
   )
 );
-
+const users = {};
 passport.serializeUser((user, done) => {
+  users[user.id] = user;
   console.log("Serializing user:", user.id);
   done(null, user.id);
 });
 
-passport.deserializeUser((user, done) => {
+passport.deserializeUser((userId, done) => {
+  const user = users[userId];
   console.log("Deserializing user:", user);
   done(null, user);
 });
