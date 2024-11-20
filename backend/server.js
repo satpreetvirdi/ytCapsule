@@ -99,11 +99,12 @@ app.get(
         users.push(req.user);       
         req.session.user = req.user;
         console.log("Session after login:after", req.session);
+        console.log("req.session.user.accessToken",req.session.user.accessToken);
 
         const cookieJar = new CookieJar();
         const response = await axios.get("https://www.youtube.com/", {
           headers: {
-            Authorization: `Bearer ${req.user.accessToken}`,
+            Authorization: `Bearer ${req.session.user.accessToken}`,
           },
           jar: cookieJar,
           withCredentials: true,
