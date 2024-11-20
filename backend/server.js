@@ -30,7 +30,7 @@ app.use(express.json());
 // Configure Redis
 const redisClient = createClient({
   url: process.env.REDIS_URL, 
-  legacyMode: true, 
+  // legacyMode: true, 
 });
 redisClient.connect().catch(console.error);
 
