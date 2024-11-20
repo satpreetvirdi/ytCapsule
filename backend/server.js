@@ -125,7 +125,7 @@ app.get(
 // Check authentication status
 app.get('/check-auth', (req, res) => {
   console.log("Session data in /check-auth:", req.session);
-  // console.log("User in /check-auth:", req);
+  console.log("Authenticated user:", req.user);
 
   if (req.user) {
     console.log("Authenticated user:", req.user);
