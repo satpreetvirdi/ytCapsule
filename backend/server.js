@@ -71,13 +71,13 @@ passport.use(
   )
 );
 passport.serializeUser((user, done) => {
-  // users[user.id] = user;
+
   console.log("Serializing user:", user.id);
   done(null, user.id);
 });
 
 passport.deserializeUser((user, done) => {
-  // const user = users[userId];
+
   console.log("Deserializing user:", user);
   done(null, user);
 });
@@ -97,11 +97,11 @@ app.get(
     console.log("Authentication callback triggered.");
     if (req.user) {
       try {
-        console.log("Session after login:before", req.session); 
+
         users.push(req.user);       
         req.session.user = req.user;
         console.log("Session after login:after", req.session);
-        console.log("req.session.user.accessToken",req.session.user.accessToken);
+
 
         const cookieJar = new CookieJar();
         const response = await axios.get("https://www.youtube.com/", {
@@ -111,20 +111,15 @@ app.get(
           jar: cookieJar,
           withCredentials: true,
         });
-        console.log("response",response);
-        // const cookies = cookieJar.toJSON();
-        
+        console.log("cookieJar",cookieJar);
         const cookiesJSON = cookieJar.toJSON();
-        // console.log("Captured cookies:", cookiesJSON);
-
-         // Now loop through cookiesJSON and extract the cookie values
+        
         const cookieString = Object.values(cookiesJSON.cookies)
         .map(cookie => cookie.cookieString())
        .join('; ');
         console.log("cookieString",cookieString);
        const cookiesFilePath = path.join(__dirname, "cookies.json");
        fs.writeFileSync(cookiesFilePath, cookieString);  
-
         console.log("Cookies saved to cookies.json");
       } catch (error) {
         console.error("Error capturing cookies:", error.message);
@@ -164,24 +159,23 @@ app.post("/summarize", async (req, res) => {
   //   console.warn("User not authenticated for summarize route.");
   //   return res.status(401).json({ error: "User not authenticated" });
   // }
-  const cookies = req.cookies["set-cookie"];
-  console.log("Captured cookies:", cookies);
-  if (!sid) {
-    return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
-  }
+  // const cookies = req.cookies["set-cookie"];
+  // console.log("Captured cookies:", cookies);
+  // if (!cookies) {
+  //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
+  // }
   const { videoUrl } = req.body;
   const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
   // fs.writeFileSync(cookiesFilePath, cookies.join('; '));
   const outputPath = path.join(__dirname, "output.mp3");
 
   try {
-    // const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
-
+    const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
+    console.log("cookies",cookies);
     // if (!cookies) {
     //   console.error("Cookies file not found.");
     //   return res.status(400).json({ error: "Cookies not found, user not authenticated." });
-    // }
-
+    // 
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
