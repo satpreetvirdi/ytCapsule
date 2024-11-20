@@ -111,13 +111,20 @@ app.get(
           jar: cookieJar,
           withCredentials: true,
         });
+        console.log("response",response);
+        // const cookies = cookieJar.toJSON();
+        
+        const cookiesJSON = cookieJar.toJSON();
+        // console.log("Captured cookies:", cookiesJSON);
 
-        const cookies = cookieJar.toJSON();
-        console.log("Captured cookies:", cookies);
+         // Now loop through cookiesJSON and extract the cookie values
+        const cookieString = Object.values(cookiesJSON.cookies)
+        .map(cookie => cookie.cookieString())
+       .join('; ');
+        console.log("cookieString",cookieString);
+       const cookiesFilePath = path.join(__dirname, "cookies.json");
+       fs.writeFileSync(cookiesFilePath, cookieString);  
 
-        const cookiesFilePath = path.join(__dirname, "cookies.json");
-        const cookieString = cookies.map(cookie => cookie.cookieString()).join('; ');
-        fs.writeFileSync(cookiesFilePath, cookieString);
         console.log("Cookies saved to cookies.json");
       } catch (error) {
         console.error("Error capturing cookies:", error.message);
@@ -157,17 +164,18 @@ app.post("/summarize", async (req, res) => {
   //   console.warn("User not authenticated for summarize route.");
   //   return res.status(401).json({ error: "User not authenticated" });
   // }
-  const sid = req.cookies["cookie.sid"];
-  console.log("sid",sid);
+  const cookies = req.cookies["set-cookie"];
+  console.log("Captured cookies:", cookies);
   if (!sid) {
     return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   }
   const { videoUrl } = req.body;
   const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
+  // fs.writeFileSync(cookiesFilePath, cookies.join('; '));
   const outputPath = path.join(__dirname, "output.mp3");
 
   try {
-    const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
+    // const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
 
     // if (!cookies) {
     //   console.error("Cookies file not found.");
@@ -177,7 +185,7 @@ app.post("/summarize", async (req, res) => {
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookie "cookie.sid=${sid}" ${videoUrl}`,
+        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookie "${ytDlpCookiesPath}" ${videoUrl}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error("Audio extraction failed:", error);
