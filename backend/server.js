@@ -12,6 +12,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const { CookieJar } = require("tough-cookie");
 const RedisStore = require("connect-redis").default;
+const { createClient } = require('redis');
 // Configure ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath);
 
