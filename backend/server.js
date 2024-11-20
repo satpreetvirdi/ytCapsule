@@ -11,7 +11,7 @@ const session = require("express-session");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const { CookieJar } = require("tough-cookie");
-
+const RedisStore = require("connect-redis").default;
 // Configure ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -26,14 +26,24 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Configure Redis
+const redisClient = createClient({
+  url: process.env.REDIS_URL, 
+  legacyMode: true, 
+});
+redisClient.connect().catch(console.error);
+
 // Session middleware
 app.use(
   session({
+    store: new RedisStore({ client: redisClient }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: false
+      secure: false,
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000
     },
   })
 );
