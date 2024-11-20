@@ -13,6 +13,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const { CookieJar } = require("tough-cookie");
 const RedisStore = require("connect-redis").default;
 const { createClient } = require('redis');
+const cookieParser = require('cookie-parser');
 // Configure ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -26,6 +27,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 
 // Configure Redis
 const redisClient = createClient({
@@ -155,7 +157,11 @@ app.post("/summarize", async (req, res) => {
   //   console.warn("User not authenticated for summarize route.");
   //   return res.status(401).json({ error: "User not authenticated" });
   // }
-
+  const sid = req.cookies["cookie.sid"];
+  console.log("sid",sid);
+  if (!sid) {
+    return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
+  }
   const { videoUrl } = req.body;
   const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
   const outputPath = path.join(__dirname, "output.mp3");
@@ -171,7 +177,7 @@ app.post("/summarize", async (req, res) => {
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies-from-browser chrome ${videoUrl}`,
+        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookie "cookie.sid=${sid}" ${videoUrl}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error("Audio extraction failed:", error);
