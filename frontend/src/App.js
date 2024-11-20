@@ -20,7 +20,7 @@ const App = () => {
         }
       })
       .catch(() => {
-        console.log("response",response.data);
+        // console.log("response",response.data);
 
         setIsLoggedIn(false);
       });
