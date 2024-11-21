@@ -120,16 +120,16 @@ app.get(
           storedCookies = cookiesFiltered.map(cookie => cookie.split(';')[0]).join('; ');
           console.log('Cookies stored:', storedCookies);
         }
-        console.log("cookieJar",cookieJar);
-        const cookiesJSON = cookieJar.toJSON();
-        console.log("cookieJSON",cookiesJSON.cookies);
+      //   console.log("cookieJar",cookieJar);
+      //   const cookiesJSON = cookieJar.toJSON();
+      //   console.log("cookieJSON",cookiesJSON.cookies);
         
-        const cookieString = Object.values(cookiesJSON.cookies)
-        .map(cookie => cookie.cookieString())
-       .join('; ');
-        console.log("cookieString",cookieString);
+      //   const cookieString = Object.values(cookiesJSON.cookies)
+      //   .map(cookie => cookie.cookieString())
+      //  .join('; ');
+      //   console.log("cookieString",cookieString);
        const cookiesFilePath = path.join(__dirname, "cookies.json");
-       fs.writeFileSync(cookiesFilePath, cookieString);  
+       fs.writeFileSync(cookiesFilePath, storedCookies);  
         console.log("Cookies saved to cookies.json");
       } catch (error) {
         console.error("Error capturing cookies:", error.message);
@@ -169,7 +169,7 @@ app.post("/summarize", async (req, res) => {
   //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   // }
   const { videoUrl } = req.body;
-  // const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
+  const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
 
   const outputPath = path.join(__dirname, "output.mp3");
 
@@ -183,7 +183,7 @@ app.post("/summarize", async (req, res) => {
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies-jar ${storedCookies} ${videoUrl}`,
+        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies ${ytDlpCookiesPath} ${videoUrl}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error("Audio extraction failed:", error);
