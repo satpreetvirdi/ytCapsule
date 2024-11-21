@@ -29,6 +29,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+const { videoUrl } = req.body;
 
 // Configure Redis
 const redisClient = createClient({
@@ -130,32 +131,31 @@ app.get(
     console.log("Authentication callback triggered.");
     if (req.user) {
       try {
-      const { videoUrl } = req.body;
 
         users.push(req.user);       
         req.session.user = req.user;
         console.log("Session after login:after", req.session);
 
 
-        const cookieJar = new CookieJar();
-        const response = await axios.get(videoUrl, {
-          headers: {
-            Authorization: `Bearer ${req.session.user.accessToken}`,
-          },
-          jar: cookieJar,
-          withCredentials: true,
-        });
-        console.log("response header", response.headers);
-        const cookiesFiltered = response.headers['set-cookie'];
-        console.log("cookiesFiltered" , cookiesFiltered);
-        if (cookiesFiltered && cookiesFiltered.length > 0) {
-          const netscapeFormattedCookies = parseCookiesToNetscape(cookiesFiltered);
-          console.log("Netscape formatted",netscapeFormattedCookies);
-          const header = "# Netscape HTTP Cookie File\n";
-          const cookiesFilePath = path.join(__dirname, "cookies.txt");
-          fs.writeFileSync(cookiesFilePath, netscapeFormattedCookies);
-          console.log("Cookies saved to cookies.txt in Netscape format");
-        }
+        // const cookieJar = new CookieJar();
+        // const response = await axios.get("https://www.youtube.com/", {
+        //   headers: {
+        //     Authorization: `Bearer ${req.session.user.accessToken}`,
+        //   },
+        //   jar: cookieJar,
+        //   withCredentials: true,
+        // });
+        // console.log("response header", response.headers);
+        // const cookiesFiltered = response.headers['set-cookie'];
+        // console.log("cookiesFiltered" , cookiesFiltered);
+        // if (cookiesFiltered && cookiesFiltered.length > 0) {
+        //   const netscapeFormattedCookies = parseCookiesToNetscape(cookiesFiltered);
+        //   console.log("Netscape formatted",netscapeFormattedCookies);
+        //   const header = "# Netscape HTTP Cookie File\n";
+        //   const cookiesFilePath = path.join(__dirname, "cookies.txt");
+        //   fs.writeFileSync(cookiesFilePath, netscapeFormattedCookies);
+        //   console.log("Cookies saved to cookies.txt in Netscape format");
+        // }
         //   console.log("cookieJar",cookieJar);
         //   const cookiesJSON = cookieJar.toJSON();
         //   console.log("cookieJSON",cookiesJSON.cookies);
@@ -203,18 +203,32 @@ app.post("/summarize", async (req, res) => {
     // if (!cookies) {
   //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   // }
-  const ytDlpCookiesPath = path.join(__dirname, "cookies.txt");
   const { videoUrl } = req.body;
+  const ytDlpCookiesPath = path.join(__dirname, "cookies.txt");
 
   const outputPath = path.join(__dirname, "output.mp3");
 
   try {
-    // const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
-    // console.log("cookies",cookies);
-    // if (!cookies) {
-    //   console.error("Cookies file not found.");
-    //   return res.status(400).json({ error: "Cookies not found, user not authenticated." });
-    // 
+    const cookieJar = new CookieJar();
+    const response = await axios.get(videoUrl, {
+      headers: {
+        Authorization: `Bearer ${req.session.user.accessToken}`,
+      },
+      jar: cookieJar,
+      withCredentials: true,
+    });
+    console.log("Response headers:", response.headers);
+    const cookiesFiltered = response.headers['set-cookie'];
+    console.log("Filtered cookies:", cookiesFiltered);
+
+    // Process the cookies and save them in Netscape format
+    if (cookiesFiltered && cookiesFiltered.length > 0) {
+      const netscapeFormattedCookies = parseCookiesToNetscape(cookiesFiltered);
+      console.log("Netscape formatted cookies:", netscapeFormattedCookies);
+      const cookiesFilePath = path.join(__dirname, "cookies.txt");
+      fs.writeFileSync(cookiesFilePath, netscapeFormattedCookies);
+      console.log("Cookies saved to cookies.txt in Netscape format");
+    }
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
