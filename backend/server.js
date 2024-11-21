@@ -123,6 +123,8 @@ const parseCookiesToNetscape = (cookies) => {
 };
 
 const users = [];
+let accessToken;
+
 // Google OAuth callback route
 app.get(
   "/auth/google/callback",
@@ -136,7 +138,7 @@ app.get(
         req.session.user = req.user;
         console.log("Session after login:after", req.session);
 
-
+        accessToken = req.session.user.accessToken;
         // const cookieJar = new CookieJar();
         // const response = await axios.get("https://www.youtube.com/", {
         //   headers: {
@@ -190,7 +192,6 @@ app.get('/check-auth', (req, res) => {
 
   res.status(200).json({ isAuthenticated: false });
 });
-
 // Redirect after successful login
 app.get("/auth-redirect", (req, res) => {
   if (req.isAuthenticated()) {
@@ -212,7 +213,7 @@ app.post("/summarize", async (req, res) => {
     const cookieJar = new CookieJar();
     const response = await axios.get(videoUrl, {
       headers: {
-        Authorization: `Bearer ${req.session.user.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       jar: cookieJar,
       withCredentials: true,
