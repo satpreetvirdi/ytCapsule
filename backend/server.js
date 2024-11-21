@@ -90,6 +90,7 @@ app.get(
 );
 
 const users = [];
+let storedCookies = ''; 
 // Google OAuth callback route
 app.get(
   "/auth/google/callback",
@@ -113,6 +114,12 @@ app.get(
           withCredentials: true,
         });
         console.log("response header", response.headers);
+        const cookiesFiltered = response.headers['set-cookie'];
+        console.log("cookiesFiltered" , cookiesFiltered);
+        if (cookiesFiltered && cookiesFiltered.length > 0) {
+          storedCookies = cookiesFiltered.map(cookie => cookie.split(';')[0]).join('; ');
+          console.log('Cookies stored:', storedCookies);
+        }
         console.log("cookieJar",cookieJar);
         const cookiesJSON = cookieJar.toJSON();
         console.log("cookieJSON",cookiesJSON.cookies);
@@ -162,13 +169,13 @@ app.post("/summarize", async (req, res) => {
   //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   // }
   const { videoUrl } = req.body;
-  const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
+  // const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
 
   const outputPath = path.join(__dirname, "output.mp3");
 
   try {
-    const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
-    console.log("cookies",cookies);
+    // const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
+    // console.log("cookies",cookies);
     // if (!cookies) {
     //   console.error("Cookies file not found.");
     //   return res.status(400).json({ error: "Cookies not found, user not authenticated." });
@@ -176,7 +183,7 @@ app.post("/summarize", async (req, res) => {
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies "${ytDlpCookiesPath}" ${videoUrl}`,
+        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies-jar ${storedCookies} ${videoUrl}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error("Audio extraction failed:", error);
