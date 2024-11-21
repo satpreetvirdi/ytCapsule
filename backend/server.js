@@ -236,7 +236,7 @@ app.post("/summarize", async (req, res) => {
       const netscapeFormattedCookies = parseCookiesToNetscape(cookiesFiltered);
       const header = "# Netscape HTTP Cookie File\n# This is a generated file! Do not edit.\n\n";
       console.log("Netscape formatted cookies:",header + netscapeFormattedCookies);
-      fs.writeFileSync(cookiesFilePath, netscapeFormattedCookies);
+      fs.writeFileSync(cookiesFilePath, header + netscapeFormattedCookies);
       console.log("Cookies saved to cookies.txt in Netscape format");
       const savedCookies = fs.readFileSync(cookiesFilePath, 'utf8').trim();
       if (savedCookies.length === 0) {
