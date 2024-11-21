@@ -125,6 +125,9 @@ const parseCookiesToNetscape = (cookies) => {
       console.error(`Error processing cookie: ${cookie}`, error);
       return ''; // Skip any invalid cookies
     }
+  }).filter(Boolean)  // Filter out invalid cookies (empty strings)
+    .join('\n'); // Join all valid cookies into a single string separated by newlines
+};
 
 const users = [];
 let accessToken;
