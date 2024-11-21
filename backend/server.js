@@ -222,14 +222,21 @@ app.post("/summarize", async (req, res) => {
     console.log("Response headers:", response.headers);
     const cookiesFiltered = response.headers['set-cookie'];
     console.log("Filtered cookies:", cookiesFiltered);
+    const cookiesFilePath = path.join(__dirname, "cookies.txt");
 
     // Process the cookies and save them in Netscape format
     if (cookiesFiltered && cookiesFiltered.length > 0) {
       const netscapeFormattedCookies = parseCookiesToNetscape(cookiesFiltered);
       console.log("Netscape formatted cookies:", netscapeFormattedCookies);
-      const cookiesFilePath = path.join(__dirname, "cookies.txt");
       fs.writeFileSync(cookiesFilePath, netscapeFormattedCookies);
       console.log("Cookies saved to cookies.txt in Netscape format");
+      const savedCookies = fs.readFileSync(cookiesFilePath, 'utf8').trim();
+      if (savedCookies.length === 0) {
+        console.log("cookies.txt is empty after saving.");
+        return res.status(500).json({ error: "Failed to save cookies correctly." });
+      } else {
+        console.log("cookies.txt contains cookies.");
+      }
     }
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
