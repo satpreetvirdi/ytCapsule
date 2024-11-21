@@ -89,27 +89,38 @@ app.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 const parseCookiesToNetscape = (cookies) => {
-  const netscapeCookies = cookies.map(cookie => {
-    // Split cookie into individual key-value pairs
-    const cookieParts = cookie.split(';').map(part => part.trim());
+  return cookies.map(cookie => {
+    try {
+      // Split cookie into individual key-value pairs
+      const cookieParts = cookie.split(';').map(part => part.trim());
 
-    // Extract cookie name and value
-    const [name, value] = cookieParts[0].split('=');
+      // Extract cookie name and value
+      const [name, value] = cookieParts[0].split('=');
 
-    // Extract additional attributes
-    const domain = cookieParts.find(part => part.startsWith('Domain=')).split('=')[1];
-    const path = cookieParts.find(part => part.startsWith('Path=')).split('=')[1] || '/';
-    const secure = cookieParts.includes('Secure') ? 'TRUE' : 'FALSE';
-    const expiration = cookieParts.find(part => part.startsWith('Expires='))
-      ? new Date(cookieParts.find(part => part.startsWith('Expires=')).split('=')[1]).getTime() / 1000
-      : 2147483647; // Set to far-future timestamp if no expiration is set
+      // Extract additional attributes
+      const domainAttr = cookieParts.find(part => part.startsWith('Domain='));
+      const domain = domainAttr ? domainAttr.split('=')[1] : '';
+      const formattedDomain = domain.startsWith('.') ? domain : `.${domain}`;
 
-    // Format the cookie in Netscape format
-    return `${domain}\tTRUE\t${path}\t${secure}\t${expiration}\t${name}\t${value}`;
-  });
+      const pathAttr = cookieParts.find(part => part.startsWith('Path='));
+      const path = pathAttr ? pathAttr.split('=')[1] : '/';
 
-  return netscapeCookies.join('\n');
+      const secure = cookieParts.includes('Secure') ? 'TRUE' : 'FALSE';
+
+      const expiresAttr = cookieParts.find(part => part.startsWith('Expires='));
+      const expiration = expiresAttr
+        ? Math.floor(new Date(expiresAttr.split('=')[1]).getTime() / 1000)
+        : 2147483647; // Default expiration
+
+      // Format the cookie in Netscape format
+      return `${formattedDomain}\tTRUE\t${path}\t${secure}\t${expiration}\t${name}\t${value}`;
+    } catch (error) {
+      console.error(`Error processing cookie: ${cookie}`, error);
+      return ''; // Skip invalid cookies
+    }
+  }).filter(Boolean).join('\n');
 };
+
 const users = [];
 // Google OAuth callback route
 app.get(
