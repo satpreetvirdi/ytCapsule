@@ -29,7 +29,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-const { videoUrl } = req.body;
 
 // Configure Redis
 const redisClient = createClient({
@@ -131,6 +130,7 @@ app.get(
     console.log("Authentication callback triggered.");
     if (req.user) {
       try {
+      const { videoUrl } = req.body;
 
         users.push(req.user);       
         req.session.user = req.user;
@@ -204,6 +204,7 @@ app.post("/summarize", async (req, res) => {
   //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   // }
   const ytDlpCookiesPath = path.join(__dirname, "cookies.txt");
+  const { videoUrl } = req.body;
 
   const outputPath = path.join(__dirname, "output.mp3");
 
