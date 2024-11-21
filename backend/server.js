@@ -218,6 +218,7 @@ app.post("/summarize", async (req, res) => {
       jar: cookieJar,
       withCredentials: true,
     });
+
     console.log("Response headers:", response.headers);
     const cookiesFiltered = response.headers['set-cookie'];
     console.log("Filtered cookies:", cookiesFiltered);
@@ -233,10 +234,11 @@ app.post("/summarize", async (req, res) => {
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}"  --cookies  ${ytDlpCookiesPath} ${videoUrl}`,
+        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies ${ytDlpCookiesPath} ${videoUrl}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error("Audio extraction failed:", error);
+            fs.unlinkSync(ytDlpCookiesPath);
             return reject(error);
           }
           console.log("Audio extraction completed successfully:", stdout);
