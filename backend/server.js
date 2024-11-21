@@ -138,7 +138,7 @@ app.get(
         console.log("cookiesFiltered" , cookiesFiltered);
         if (cookiesFiltered && cookiesFiltered.length > 0) {
           const netscapeFormattedCookies = parseCookiesToNetscape(cookiesFiltered);
-
+          console.log("Netscape formatted",netscapeFormattedCookies);
           const header = "# Netscape HTTP Cookie File\n";
           const cookiesFilePath = path.join(__dirname, "cookies.txt");
           fs.writeFileSync(cookiesFilePath, header + netscapeFormattedCookies);
