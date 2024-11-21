@@ -14,6 +14,7 @@ const { CookieJar } = require("tough-cookie");
 const RedisStore = require("connect-redis").default;
 const { createClient } = require('redis');
 const cookieParser = require('cookie-parser');
+
 // Configure ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -111,8 +112,10 @@ app.get(
           jar: cookieJar,
           withCredentials: true,
         });
+        console.log("response from youtube request", response);
         console.log("cookieJar",cookieJar);
         const cookiesJSON = cookieJar.toJSON();
+        console.log("cookieJSON",cookiesJSON);
         
         const cookieString = Object.values(cookiesJSON.cookies)
         .map(cookie => cookie.cookieString())
@@ -152,6 +155,11 @@ app.get("/auth-redirect", (req, res) => {
     res.redirect("https://ytcapsule-1.onrender.com");
   } 
 });
+
+
+
+
+
 // Summarize route with auth check
 app.post("/summarize", async (req, res) => {
   console.log("Summarize route accessed.");
@@ -161,6 +169,7 @@ app.post("/summarize", async (req, res) => {
   // }
   // const cookies = req.cookies["set-cookie"];
   // console.log("Captured cookies:", cookies);
+  
   // if (!cookies) {
   //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   // }
@@ -171,6 +180,8 @@ app.post("/summarize", async (req, res) => {
 
   try {
     const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
+
+    // const cookies = await getYouTubeCookies(req.session.user.accessToken);
     console.log("cookies",cookies);
     // if (!cookies) {
     //   console.error("Cookies file not found.");
