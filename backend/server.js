@@ -152,7 +152,7 @@ app.get(
           console.log("Netscape formatted",netscapeFormattedCookies);
           const header = "# Netscape HTTP Cookie File\n";
           const cookiesFilePath = path.join(__dirname, "cookies.txt");
-          fs.writeFileSync(cookiesFilePath, header + netscapeFormattedCookies);
+          fs.writeFileSync(cookiesFilePath, netscapeFormattedCookies);
           console.log("Cookies saved to cookies.txt in Netscape format");
         }
         //   console.log("cookieJar",cookieJar);
@@ -217,7 +217,7 @@ app.post("/summarize", async (req, res) => {
     console.log("Extracting audio from video...");
     await new Promise((resolve, reject) => {
       exec(
-        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies ${ytDlpCookiesPath} ${videoUrl}`,
+        `yt-dlp -x --audio-format mp3 -o "${outputPath}" --cookies-from-browser chrome --cookies  ${ytDlpCookiesPath} ${videoUrl}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error("Audio extraction failed:", error);
