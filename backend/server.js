@@ -169,7 +169,7 @@ app.post("/summarize", async (req, res) => {
   //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   // }
   const { videoUrl } = req.body;
-  const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
+  const ytDlpCookiesPath = path.join(__dirname, "cookies.txt");
 
   const outputPath = path.join(__dirname, "output.mp3");
 
