@@ -256,12 +256,12 @@ app.post("/summarize", async (req, res) => {
             fs.unlinkSync(ytDlpCookiesPath);
             return reject(error);
           }
+          fs.unlinkSync(ytDlpCookiesPath);
           console.log("Audio extraction completed successfully:", stdout);
           resolve();
         }
       );
     });
-    fs.unlinkSync(ytDlpCookiesPath);
     console.log("Uploading extracted audio...");
     const uploadResponse = await axios.post(
       "https://api.assemblyai.com/v2/upload",
