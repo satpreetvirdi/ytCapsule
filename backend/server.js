@@ -88,9 +88,29 @@ app.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
+const parseCookiesToNetscape = (cookies) => {
+  const netscapeCookies = cookies.map(cookie => {
+    // Split cookie into individual key-value pairs
+    const cookieParts = cookie.split(';').map(part => part.trim());
 
+    // Extract cookie name and value
+    const [name, value] = cookieParts[0].split('=');
+
+    // Extract additional attributes
+    const domain = cookieParts.find(part => part.startsWith('Domain=')).split('=')[1];
+    const path = cookieParts.find(part => part.startsWith('Path=')).split('=')[1] || '/';
+    const secure = cookieParts.includes('Secure') ? 'TRUE' : 'FALSE';
+    const expiration = cookieParts.find(part => part.startsWith('Expires='))
+      ? new Date(cookieParts.find(part => part.startsWith('Expires=')).split('=')[1]).getTime() / 1000
+      : 2147483647; // Set to far-future timestamp if no expiration is set
+
+    // Format the cookie in Netscape format
+    return `${domain}\tTRUE\t${path}\t${secure}\t${expiration}\t${name}\t${value}`;
+  });
+
+  return netscapeCookies.join('\n');
+};
 const users = [];
-let storedCookies = ''; 
 // Google OAuth callback route
 app.get(
   "/auth/google/callback",
@@ -117,19 +137,22 @@ app.get(
         const cookiesFiltered = response.headers['set-cookie'];
         console.log("cookiesFiltered" , cookiesFiltered);
         if (cookiesFiltered && cookiesFiltered.length > 0) {
-          storedCookies = cookiesFiltered.map(cookie => cookie.split(';')[0]).join('; ');
-          console.log('Cookies stored:', storedCookies);
+          const netscapeFormattedCookies = parseCookiesToNetscape(cookiesFiltered);
+
+          const header = "# Netscape HTTP Cookie File\n";
+          const cookiesFilePath = path.join(__dirname, "cookies.txt");
+          fs.writeFileSync(cookiesFilePath, header + netscapeFormattedCookies);
+          console.log("Cookies saved to cookies.txt in Netscape format");
         }
-      //   console.log("cookieJar",cookieJar);
-      //   const cookiesJSON = cookieJar.toJSON();
-      //   console.log("cookieJSON",cookiesJSON.cookies);
+        //   console.log("cookieJar",cookieJar);
+        //   const cookiesJSON = cookieJar.toJSON();
+        //   console.log("cookieJSON",cookiesJSON.cookies);
         
-      //   const cookieString = Object.values(cookiesJSON.cookies)
-      //   .map(cookie => cookie.cookieString())
-      //  .join('; ');
+        //   const cookieString = Object.values(cookiesJSON.cookies)
+        //   .map(cookie => cookie.cookieString())
+        //  .join('; ');
       //   console.log("cookieString",cookieString);
-       const cookiesFilePath = path.join(__dirname, "cookies.txt");
-       fs.writeFileSync(cookiesFilePath, storedCookies);  
+      //  fs.writeFileSync(cookiesFilePath, storedCookies);  
         console.log("Cookies saved to cookies.json");
       } catch (error) {
         console.error("Error capturing cookies:", error.message);
