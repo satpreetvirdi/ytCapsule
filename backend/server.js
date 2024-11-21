@@ -29,6 +29,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+const { videoUrl } = req.body;
 
 // Configure Redis
 const redisClient = createClient({
@@ -137,7 +138,7 @@ app.get(
 
 
         const cookieJar = new CookieJar();
-        const response = await axios.get("https://www.youtube.com/", {
+        const response = await axios.get(videoUrl, {
           headers: {
             Authorization: `Bearer ${req.session.user.accessToken}`,
           },
@@ -202,7 +203,6 @@ app.post("/summarize", async (req, res) => {
     // if (!cookies) {
   //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   // }
-  const { videoUrl } = req.body;
   const ytDlpCookiesPath = path.join(__dirname, "cookies.txt");
 
   const outputPath = path.join(__dirname, "output.mp3");
@@ -228,7 +228,7 @@ app.post("/summarize", async (req, res) => {
         }
       );
     });
-
+    fs.unlinkSync(ytDlpCookiesPath);
     console.log("Uploading extracted audio...");
     const uploadResponse = await axios.post(
       "https://api.assemblyai.com/v2/upload",
