@@ -128,7 +128,7 @@ app.get(
       //   .map(cookie => cookie.cookieString())
       //  .join('; ');
       //   console.log("cookieString",cookieString);
-       const cookiesFilePath = path.join(__dirname, "cookies.json");
+       const cookiesFilePath = path.join(__dirname, "cookies.txt");
        fs.writeFileSync(cookiesFilePath, storedCookies);  
         console.log("Cookies saved to cookies.json");
       } catch (error) {
