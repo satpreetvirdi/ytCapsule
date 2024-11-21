@@ -112,10 +112,10 @@ app.get(
           jar: cookieJar,
           withCredentials: true,
         });
-        console.log("response from youtube request", response);
+        console.log("response header", response.headers);
         console.log("cookieJar",cookieJar);
         const cookiesJSON = cookieJar.toJSON();
-        console.log("cookieJSON",cookiesJSON);
+        console.log("cookieJSON",cookiesJSON.cookies);
         
         const cookieString = Object.values(cookiesJSON.cookies)
         .map(cookie => cookie.cookieString())
@@ -155,33 +155,19 @@ app.get("/auth-redirect", (req, res) => {
     res.redirect("https://ytcapsule-1.onrender.com");
   } 
 });
-
-
-
-
-
 // Summarize route with auth check
 app.post("/summarize", async (req, res) => {
   console.log("Summarize route accessed.");
-  // if (!req.isAuthenticated() && !req.session.user) {
-  //   console.warn("User not authenticated for summarize route.");
-  //   return res.status(401).json({ error: "User not authenticated" });
-  // }
-  // const cookies = req.cookies["set-cookie"];
-  // console.log("Captured cookies:", cookies);
-  
-  // if (!cookies) {
+    // if (!cookies) {
   //   return res.status(400).json({ error: "Session cookie (cookie.sid) not found." });
   // }
   const { videoUrl } = req.body;
   const ytDlpCookiesPath = path.join(__dirname, "cookies.json");
-  // fs.writeFileSync(cookiesFilePath, cookies.join('; '));
+
   const outputPath = path.join(__dirname, "output.mp3");
 
   try {
     const cookies = fs.existsSync(ytDlpCookiesPath) ? fs.readFileSync(ytDlpCookiesPath, "utf-8") : null;
-
-    // const cookies = await getYouTubeCookies(req.session.user.accessToken);
     console.log("cookies",cookies);
     // if (!cookies) {
     //   console.error("Cookies file not found.");
