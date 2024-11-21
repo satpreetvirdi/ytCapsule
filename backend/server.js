@@ -92,35 +92,39 @@ app.get(
 const parseCookiesToNetscape = (cookies) => {
   return cookies.map(cookie => {
     try {
-      // Split cookie into individual key-value pairs
+      // Split the cookie into individual parts by semicolon and trim extra spaces
       const cookieParts = cookie.split(';').map(part => part.trim());
 
-      // Extract cookie name and value
+      // Extract the name and value from the first part (before the first semicolon)
       const [name, value] = cookieParts[0].split('=');
 
-      // Extract additional attributes
+      // Extract the domain, defaulting to empty string if not found
       const domainAttr = cookieParts.find(part => part.startsWith('Domain='));
       const domain = domainAttr ? domainAttr.split('=')[1] : '';
-      const formattedDomain = domain.startsWith('.') ? domain : `.${domain}`;
+      const formattedDomain = domain && !domain.startsWith('.') ? `.${domain}` : domain;
 
+      // Extract the path, defaulting to '/' if not provided
       const pathAttr = cookieParts.find(part => part.startsWith('Path='));
       const path = pathAttr ? pathAttr.split('=')[1] : '/';
 
+      // Check if the cookie is marked as Secure
       const secure = cookieParts.includes('Secure') ? 'TRUE' : 'FALSE';
 
+      // Extract the expiration date and convert it to Unix timestamp, defaulting to max value if not found
       const expiresAttr = cookieParts.find(part => part.startsWith('Expires='));
       const expiration = expiresAttr
         ? Math.floor(new Date(expiresAttr.split('=')[1]).getTime() / 1000)
-        : 2147483647; // Default expiration
+        : 2147483647; // Default expiration if not found
 
-      // Format the cookie in Netscape format
+      // Handle HttpOnly flag, but it doesn't affect the Netscape format
+      const httpOnly = cookieParts.includes('HttpOnly') ? 'TRUE' : 'FALSE'; // Not necessary for Netscape format, but could be logged
+
+      // Create the Netscape formatted cookie string
       return `${formattedDomain}\tTRUE\t${path}\t${secure}\t${expiration}\t${name}\t${value}`;
     } catch (error) {
       console.error(`Error processing cookie: ${cookie}`, error);
-      return ''; // Skip invalid cookies
+      return ''; // Skip any invalid cookies
     }
-  }).filter(Boolean).join('\n');
-};
 
 const users = [];
 let accessToken;
