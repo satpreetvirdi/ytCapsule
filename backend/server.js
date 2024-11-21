@@ -29,7 +29,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-const { videoUrl } = req.body;
+// const { videoUrl } = req.body;
 
 // Configure Redis
 const redisClient = createClient({
